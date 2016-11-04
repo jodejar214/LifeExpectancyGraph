@@ -1,0 +1,479 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+  </head>
+
+  <body>
+  
+  <h1> Project 1: Yujin Hong, John Odejar, Niki Agrawal </h1>
+
+    <h2>Countries by Life Expectancy</h2>
+    <div class = "transbox"> 
+    <p> This map shows the average life expectancies for each country<br> through a color scale 
+    that can be seen <br> in the left corner. It can be seen that most of North America and Europe have<br> higher life expectancies, while Africa has some of the lowest. <br>The scale is based on the unit of years. </p>
+    </div>
+    <div id="regions_div"></div>
+
+    <script>
+    //script for the map
+    google.charts.load('current', {'packages':['geochart']});
+    google.charts.setOnLoadCallback(drawRegionsMap);
+
+    var list = [['Country', 'Life Expectancy']];
+
+    d3.csv("lifedata.csv", function(error, data) {
+      data.forEach(function(row){
+        var item = [row.Country,+row.Lifeexpectancy];
+        list.push(item);
+      });
+    });
+
+    function drawRegionsMap() {
+      var data = google.visualization.arrayToDataTable(list);
+
+      var options = {
+        colorAxis: {colors: ['#F7BE81', '#74DF00', '#FA58F4']},
+        backgroundColor: '#A9E2F3',
+        datalessRegionColor: '#f8bbd0',
+        defaultColor: '#F6E3CE',
+        enableRegionInteractivity: false
+      };
+      
+      var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+
+      chart.draw(data, options);
+
+    }
+    </script>
+
+    <h2>Life Expectancy vs. Government Spending on Healthcare</h2>
+        <div class = "transbox"> 
+    <h2> This graph depicts a high correlation between increasing government spending <br> and  increasing life expectancy, with some outliers.  Government spending includes <br>money used on pharmaceutical research, publicly available vaccines, <br> hospital facilities, and  most importantly health insurance! </h2>
+    </div>
+    <svg id="plot"></svg>
+
+    <script>
+      //script for the plot graph
+      // reading in json file
+      d3.json("project1data.json", function(data) {
+        var svg = d3.select("#plot")
+          .attr("width", 900)
+          .attr("height", 550);
+         
+        var pxaxisScale = d3.scale.linear()
+          .domain([2, d3.max(data, function(d) {return Math.log(d.Spending);})])
+          .range([30, 850]);
+        var pyaxisScale = d3.scale.linear()
+          .domain([45, d3.max(data,function(d) {return d.Years;})])
+          .range([510, 40]);
+
+        //Create the Axis
+        var pxAxis = d3.svg.axis().scale(pxaxisScale).orient("bottom").ticks(0);
+        var pyAxis = d3.svg.axis().scale(pyaxisScale).orient("left").ticks(8);
+
+        //Create an SVG group Element for the Axis elements and call the pxAxis function
+        svg.append("g")
+          .attr("class", "axis")
+          .attr('transform', 'translate(20,510)')
+          .call(pxAxis);
+        svg.append("g")
+          .attr("class", "axis")
+          .attr('transform', 'translate(50,0)')
+          .call(pyAxis);       
+
+        //adding the x axis labels according to my log scale
+        svg.append("text")
+          .attr("x",70)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("10");
+        svg.append("text")
+          .attr("x",120)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("20");
+        svg.append("text")
+          .attr("x",200)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("40");
+        svg.append("text")
+          .attr("x",230)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("60");
+        svg.append("text")
+          .attr("x",350)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("150");
+        svg.append("text")
+          .attr("x",450)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("350");
+        svg.append("text")
+          .attr("x",600)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("1,000");
+        svg.append("text")
+          .attr("x",680)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("2,000");
+        svg.append("text")
+          .attr("x",730)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("4,000");
+        svg.append("text")
+          .attr("x",820)
+          .attr("y",524)
+          .style("font-family","Georgia")
+          .style("font-size", "14px")
+          .text("9,000");
+
+        //adding axes labels
+        svg.append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "end")
+          .attr("x", 600)
+          .attr("y", 545)
+          .style("font-weight","bold")
+          .style("font-size","12px")
+          .style("font-family","Georgia")
+          .text("Dollars Gov Spends on HealthCare / Person / Year");
+
+         svg.append("text")
+          .attr("class", "y label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 3)
+          .attr("x",-270)
+          .attr("dy","1em")
+          .style("font-weight","bold")
+          .style("font-size","12px")
+          .style("font-family","Georgia")
+          .attr("text-anchor", "middle")    
+          .text("Life Expectancy");
+
+        //looping through countries to add them with specified coordinates
+        data.forEach( function(d) {
+          svg.append("circle")
+          .attr("cx", pxaxisScale(Math.log(d.Spending)))
+          .attr("cy", pyaxisScale(d.Years))
+          .style("fill","#339933")
+          .style("opacity",0.5)
+          .attr("r",5)
+        });
+            
+        data.forEach( function(d) {
+          svg.append("text")
+          .attr("x", pxaxisScale(Math.log(d.Spending)))
+          .attr("y", pyaxisScale(d.Years))
+          //.attr("r",2)});
+          .attr("font-size","11px")
+          .text(d.Country)
+        });
+      });
+    </script>
+    
+    <h2>Contribution of Causes of Death to Mortality Rate by Percentage</h2>
+    <div class = "transbox1">
+    <p>The next two graphs show how much a cause of death contributes to the overall mortality rate. The three causes of death depicted on these graph are communicable diseases, noncommunicable diseases, and injuries. Communicable diseases are diseases that can be spread between people such as AIDS and malaria while noncommunicable diseases are non-infectious diseases such as cancer and diabetes. The first graph shows the distrubtion for 12 countries with low life expectancy rates and from the graph we see that the majority of deaths were the result of communicable diseases. The second graph shows the distribution for 12 countries with high expectancy rates and from that graph we can see that the majority of deaths were the result of noncommunicable diseases.</p>
+    </div>
+
+    <h3>Legend: </h3>
+    <svg id = "legend" width = "450" height = "115"></svg>
+    <br>
+    <svg id = "low"></svg>
+    <br>
+    <svg id = "high"></svg>
+
+    <script>
+      var low_countries = ["Sierra Leone", "Lesotho", "Chad", "Central African Republic", "Democratic Republic of the Congo","Cote d'Ivoire","Angola","Mozambique","Guinea-Bissau","Swaziland","Nigeria","Somalia"];
+
+      var high_countries = ["Japan", "Switzerland", "Italy", "Australia", "Singapore", "Iceland", "Spain", "Israel", "New Zealand", "France", "Luxembourg", "Canada"];
+
+      var margin = {top: 50, right: 50, bottom: 150, left: 50},
+        width = 1000 - margin.left - margin.right,
+        height = 650 - margin.top - margin.bottom;
+
+      var x = d3.scale.ordinal().rangeRoundBands([0, width], .2);
+      var y = d3.scale.linear().range([height, 0]);
+      var y2 = d3.scale.linear().domain([0,100]).range([height, 0]);
+
+      var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .ticks(10);
+
+      var yAxis2 = d3.svg.axis()
+        .scale(y2)
+        .orient("left")
+        .ticks(10); 
+      
+      var leg = d3.select("#legend");
+
+      leg.append("text")
+      .attr("x",10)
+      .attr("y",20)
+      .attr("alignment-baseline","middle")
+      .text("Death By Communicable Diseases")
+
+      leg.append("text")
+      .attr("x",10)
+      .attr("y",60)
+      .attr("alignment-baseline","middle")
+      .text("Death By Noncommunicable Diseases")
+
+      leg.append("text")
+      .attr("x",10)
+      .attr("y",100)
+      .attr("alignment-baseline","middle")
+      .text("Death By Injuries")
+
+      leg.append("rect")
+      .attr("x",325)
+      .attr("y",10)
+      .attr("width",100)
+      .attr("height", 18)
+      .style("fill","#009999");
+
+      leg.append("rect")
+      .attr("x",325)
+      .attr("y",50)
+      .attr("width",100)
+      .attr("height", 18)
+      .attr("alignment-baseline","middle")
+      .style("fill","#00CC99");
+
+      leg.append("rect")
+      .attr("x",325)
+      .attr("y",90)
+      .attr("width",100)
+      .attr("height", 18)
+      .attr("alignment-baseline","middle")
+      .style("fill","#00FF99");
+
+      var svg12 = d3.select("#low")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      svg12.append("text")
+      .attr("x",width/2)
+      .attr("y",margin.top - 75)
+      .attr("text-anchor","middle")
+      .attr("alignment-baseline","middle")
+      .text("12 Countries with Lowest Life Expectancy Rates")
+      .style("font-size", 20)
+      .style("font-weight","bold");
+
+      d3.csv("xmart.csv", function(error, data) {
+        data = data.filter(function(row){
+          return (low_countries.indexOf(row.Country) != -1) && (row.Year == 2012);
+        });
+        
+        x.domain(data.map(function(d) { return d.Country; }));
+        y2.domain([0, 100]);
+
+          svg12.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + 0 + "," + height + ")")
+            .call(xAxis)
+          .selectAll("text")
+            .style("text-anchor", "end")
+            .style("font-size", 12)
+            .attr("dx", "-.8em")
+            .attr("dy", "-.1em")
+            .attr("transform", "rotate(-45)" );
+
+        svg12.append("g")
+            .attr("class", "y axis")
+            .call(yAxis2)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", y2(100))
+            .attr("height", function(d) { return y2(0) - y2((d.Communicable/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#009999");
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", function(d) { return y2(100 - (d.Communicable/d.All)*100);})
+            .attr("height", function(d) { return y2(0) - y2((d.Noncommunicable/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#00CC99");
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", function(d) { return y2(100 - (d.Communicable/d.All)*100 - (d.Noncommunicable/d.All)*100);})
+            .attr("height", function(d) { return y2(0) - y2((d.Injuries/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#00FF99");
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - ((d.Communicable/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Communicable; })
+          .style("font-size", 14);
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - (d.Communicable/d.All)*100 - ((d.Noncommunicable/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Noncommunicable; })
+          .style("font-size", 14);
+
+          svg12.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - (d.Communicable/d.All)*100 - (d.Noncommunicable/d.All)*100 - ((d.Injuries/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Injuries; })
+          .style("font-size", 14);
+      });
+  
+      var svg22 = d3.select("#high")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top+80)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      svg22.append("text")
+      .attr("x",width/2)
+      .attr("y",margin.top - 75)
+      .attr("text-anchor","middle")
+      .attr("alignment-baseline","middle")
+      .text("12 Countries with Highest Life Expectancy Rates")
+      .style("font-size", 20)
+      .style("font-weight","bold");
+
+      d3.csv("xmart.csv", function(error, data) {
+        data = data.filter(function(row){
+          return (high_countries.indexOf(row.Country) != -1) && (row.Year == 2012);
+        });
+        
+        x.domain(data.map(function(d) { return d.Country; }));
+
+          svg22.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + 0 + "," + height + ")")
+            .call(xAxis)
+          .selectAll("text")
+            .style("text-anchor", "end")
+            .style("font-size", 12)
+            .attr("dx", "-.8em")
+            .attr("dy", "-.1em")
+            .attr("transform", "rotate(-45)" );
+
+        svg22.append("g")
+            .attr("class", "y axis")
+            .call(yAxis2)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", y2(100))
+            .attr("height", function(d) { return y2(0) - y2((d.Communicable/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#009999");
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", function(d) { return y2(100 - (d.Communicable/d.All)*100);})
+            .attr("height", function(d) { return y2(0) - y2((d.Noncommunicable/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#00CC99");
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("x", function(d) { return x(d.Country); })
+            .attr("y", function(d) { return y2(100 - (d.Communicable/d.All)*100 - (d.Noncommunicable/d.All)*100);})
+            .attr("height", function(d) { return y2(0) - y2((d.Injuries/d.All)*100); })
+            .attr("width", x.rangeBand())
+            .style("fill", "#00FF99");
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - ((d.Communicable/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Communicable; })
+          .style("font-size", 14);
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - (d.Communicable/d.All)*100 - ((d.Noncommunicable/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Noncommunicable; })
+          .style("font-size", 14);
+
+          svg22.selectAll("bar")
+            .data(data)
+          .enter().append("text")
+          .attr("x", function(d) { return x(d.Country) + x.rangeBand()/2; })
+          .attr("y",function(d) { return y2(100 - (d.Communicable/d.All)*100 - (d.Noncommunicable/d.All)*100 - ((d.Injuries/d.All)*100)/2);})
+          .attr("text-anchor", "middle")
+          .attr("alignment-baseline", "middle")
+          .text(function(d) { return d.Injuries; })
+          .style("font-size", 14);
+      });
+    </script>
+
+  </body>
+</html>
